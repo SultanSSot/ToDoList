@@ -10,11 +10,11 @@ import com.example.todolist.ListFragment;
  * Created by rodrigo on 11/10/16.
  */
 
-public class MainFragmentPagerAdapter extends FragmentPagerAdapter {
-    private static int NUM_ITEMS = 3;
+public class ListPagerAdapter extends FragmentPagerAdapter {
+    private static int PAGER_ITEMS_NO = 3;
 
-    public MainFragmentPagerAdapter(FragmentManager fm) {
-        super(fm);
+    public ListPagerAdapter(FragmentManager fragmentManager) {
+        super(fragmentManager);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class MainFragmentPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return NUM_ITEMS;
+        return PAGER_ITEMS_NO;
     }
 
     // Returns the page title for the top indicator
@@ -53,9 +53,9 @@ public class MainFragmentPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getItemPosition(Object object) {
-        ListFragment f = (ListFragment) object;
-        if (f != null) {
-            f.update();
+        ListFragment fragment = (ListFragment) object;
+        if (fragment != null) {
+            fragment.update();
         }
         return super.getItemPosition(object);
     }

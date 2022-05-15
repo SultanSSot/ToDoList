@@ -35,7 +35,7 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:layout_marginTop="?attr/actionBarSize"
-            tools:showIn="@layout/activity_new_task">
+            tools:showIn="@layout/activity_new">
 
 
             <com.google.android.material.textfield.TextInputLayout
@@ -134,7 +134,7 @@
                 android:layout_alignRight="@+id/description_label"
                 android:layout_alignEnd="@+id/description_label"
                 android:layout_alignBottom="@+id/button_time"
-                android:onClick="removeDate"
+                android:onClick="removeDateButton"
                 android:nestedScrollingEnabled="false"
                 android:visibility="gone" />
 

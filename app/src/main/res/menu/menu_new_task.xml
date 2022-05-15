@@ -3,13 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.todolist.NewActivity">
     <item
-        android:id="@+id/save_task"
+        android:id="@+id/task_save"
         android:orderInCategory="100"
         android:icon="@drawable/ic_check"
         app:showAsAction="always"
         android:title="@string/action_save" />
     <item
-        android:id="@+id/cancel_task"
+        android:id="@+id/task_cancel"
         android:orderInCategory="100"
         android:icon="@drawable/ic_close"
         app:showAsAction="always"

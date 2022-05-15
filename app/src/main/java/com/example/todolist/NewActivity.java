@@ -14,41 +14,29 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
-import com.mobsandgeeks.saripaar.ValidationError;
-import com.mobsandgeeks.saripaar.Validator;
-import com.mobsandgeeks.saripaar.annotation.NotEmpty;
-
-import com.example.todolist.database.TaskDBHelper;
+import com.example.todolist.database.DBHelper;
 import com.example.todolist.model.Task;
-import com.example.todolist.util.DateUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 
-public class TaskNewActivity extends AppCompatActivity implements Validator.ValidationListener {
+public class NewActivity extends AppCompatActivity{
 
     private Calendar calendar;
-    private Validator validator;
-    private FrameLayout mAdsFrame;
-    @NotEmpty(messageResId = R.string.field_empty)
     private EditText titleTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_task);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_new);
+        Toolbar toolbar = findViewById(R.id.actionbar_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        titleTask = (EditText) findViewById(R.id.title);
-        validator = new Validator(this);
-        validator.setValidationListener(this);
+        titleTask = findViewById(R.id.et_title);
     }
 
     @Override
@@ -60,11 +48,19 @@ public class TaskNewActivity extends AppCompatActivity implements Validator.Vali
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_cancel) {
+        if (id == R.id.task_cancel) {
             this.finish();
             return true;
-        }else if(id == R.id.action_save){
-            validator.validate();
+        }else if(id == R.id.task_save){
+            TextView title = findViewById(R.id.et_title);
+            TextView description = findViewById(R.id.et_description);
+            Task task = new Task(title.getText().toString(),description.getText().toString(),null,false);
+            if( calendar != null ){
+                task.setDate(calendar.getTime());
+            }
+            SaveEntry saveEntry = new SaveEntry(this);
+            saveEntry.execute(task);
+            this.finish();
             return true;
         }
 
@@ -72,115 +68,88 @@ public class TaskNewActivity extends AppCompatActivity implements Validator.Vali
     }
 
     public void showDatePickerDialog(View v) {
-        Calendar calendarTemp;
-        if(calendar == null) {
-            calendarTemp = Calendar.getInstance();
+        Calendar calendar;
+        if(this.calendar == null) {
+            calendar = Calendar.getInstance();
         }else{
-            calendarTemp = this.calendar;
+            calendar = this.calendar;
         }
-        DatePickerDialog.OnDateSetListener myDateListener = new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker arg0, int year, int month, int day) {
-                if(calendar == null){
-                    calendar = Calendar.getInstance();
+                if(NewActivity.this.calendar == null){
+                    NewActivity.this.calendar = Calendar.getInstance();
                 }
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, month);
-                calendar.set(Calendar.DAY_OF_MONTH, day);
+                NewActivity.this.calendar.set(Calendar.YEAR, year);
+                NewActivity.this.calendar.set(Calendar.MONTH, month);
+                NewActivity.this.calendar.set(Calendar.DAY_OF_MONTH, day);
                 updateTime();
-                ImageButton button = (ImageButton) findViewById(R.id.button_remove_date);
+                ImageButton button = findViewById(R.id.remove_date_button);
                 button.setVisibility(View.VISIBLE);
             }
         };
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, myDateListener, calendarTemp.get(Calendar.YEAR), calendarTemp.get(Calendar.MONTH), calendarTemp.get(Calendar.DAY_OF_MONTH));
-        datePickerDialog.show();
+        DatePickerDialog dialog = new DatePickerDialog(this, listener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        dialog.show();
     }
 
-    public void removeDate(View v) {
-        ImageButton button = (ImageButton) findViewById(R.id.button_remove_date);
+    public void removeDateButton(View v) {
+        ImageButton button = findViewById(R.id.remove_date_button);
         button.setVisibility(View.GONE);
         calendar = null;
         updateTime();
     }
 
     public void showTimePickerDialog(View v) {
-        Calendar calendarTemp;
-        if(calendar == null) {
-            calendarTemp = Calendar.getInstance();
+        Calendar calendar;
+        if(this.calendar == null) {
+            calendar = Calendar.getInstance();
         }else{
-            calendarTemp = this.calendar;
+            calendar = this.calendar;
         }
-        TimePickerDialog.OnTimeSetListener myTimeListener = new TimePickerDialog.OnTimeSetListener() {
+        TimePickerDialog.OnTimeSetListener listener = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int h, int m) {
-                if(calendar == null){
-                    calendar = Calendar.getInstance();
+                if(NewActivity.this.calendar == null){
+                    NewActivity.this.calendar = Calendar.getInstance();
                 }
-                calendar.set(Calendar.HOUR_OF_DAY, h);
-                calendar.set(Calendar.MINUTE, m);
+                NewActivity.this.calendar.set(Calendar.HOUR_OF_DAY, h);
+                NewActivity.this.calendar.set(Calendar.MINUTE, m);
                 updateTime();
-                ImageButton button = (ImageButton) findViewById(R.id.button_remove_date);
-                button.setVisibility(View.VISIBLE);
+                ImageButton imageButton = findViewById(R.id.remove_date_button);
+                imageButton.setVisibility(View.VISIBLE);
             }
         };
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, myTimeListener, calendarTemp.get(Calendar.HOUR_OF_DAY), calendarTemp.get(Calendar.MINUTE), true);
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this, listener, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true);
         timePickerDialog.show();
     }
 
     public void updateTime(){
-        TextView textView = (TextView) findViewById(R.id.date);
+        TextView tvDate = findViewById(R.id.tv_date);
         if(calendar != null){
-            textView.setText(new DateUtil(this).parse(calendar.getTime()));
+            tvDate.setText(new SimpleDateFormat("EEE").format(calendar.getTime()) + ", " + new SimpleDateFormat().format(calendar.getTime()));
         }else{
-            textView.setText("");
+            tvDate.setText("");
         }
     }
 
-    @Override
-    public void onValidationSucceeded() {
-        TextView title = (TextView) findViewById(R.id.title);
-        TextView description = (TextView) findViewById(R.id.description);
-        Task task = new Task(title.getText().toString(),description.getText().toString(),null,false);
-        if( calendar != null ){
-            task.setDate(calendar.getTime());
-        }
-        SaveTask saveTask = new SaveTask(this);
-        saveTask.execute(task);
-        this.finish();
-    }
 
-    @Override
-    public void onValidationFailed(List<ValidationError> errors) {
-        for (ValidationError error : errors) {
-            View view = error.getView();
-            String message = error.getCollatedErrorMessage(this);
-
-            // Display error messages ;)
-            if (view instanceof EditText) {
-                ((EditText) view).setError(message);
-            } else {
-                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    private class SaveTask extends AsyncTask<Task, Void, Boolean> {
+    private class SaveEntry extends AsyncTask<Task, Void, Boolean> {
 
         private Context context;
 
-        public SaveTask (Context context){
+        public SaveEntry(Context context){
             this.context = context;
         }
 
         @Override
         protected Boolean doInBackground(final Task... tasks) {
-            int rowInserted = 0;
+            int rowIns = 0;
             for(Task task: tasks) {
-                TaskDBHelper taskDBHelper = TaskDBHelper.getInstance(this.context);
-                Long newRowId = taskDBHelper.insert(task);
-                rowInserted += newRowId;
+                DBHelper taskDBHelper = DBHelper.getInstance(this.context);
+                Long newRowId = taskDBHelper.insertTask(task);
+                rowIns += newRowId;
             }
-            return rowInserted > 0;
+            return rowIns > 0;
         }
 
         @Override

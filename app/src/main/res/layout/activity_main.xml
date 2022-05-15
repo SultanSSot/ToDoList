@@ -18,7 +18,7 @@
             android:theme="@style/AppTheme.AppBarOverlay">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
+                android:id="@+id/actionbar_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
@@ -28,7 +28,7 @@
                 android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/toolbar"
+                android:layout_below="@+id/actionbar_toolbar"
                 android:background="?attr/colorPrimary"
                 android:minHeight="?attr/actionBarSize"
                 app:tabIndicatorHeight="5dp"

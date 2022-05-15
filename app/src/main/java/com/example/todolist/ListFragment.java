@@ -17,29 +17,28 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.todolist.adapters.TaskArrayAdapter;
-import com.example.todolist.adapters.UpdateAdapter;
-import com.example.todolist.database.TaskDBHelper;
+import com.example.todolist.adapters.TasksAdapter;
+import com.example.todolist.adapters.UpdateInterface;
+import com.example.todolist.database.DBHelper;
 import com.example.todolist.model.Task;
-import com.example.todolist.database.TaskContract.TaskEntry;
 
 import java.util.ArrayList;
 import java.util.Date;
 
-public class TaskListFragment extends Fragment implements UpdateAdapter {
+public class ListFragment extends Fragment implements UpdateInterface {
 
-    private TaskArrayAdapter taskArrayAdapter;
-    private int typeList;
-    public TaskListFragment() { }
+    private TasksAdapter arrayAdapter;
+    private int taskType;
+    public ListFragment() { }
 
-    public static TaskListFragment newInstance(int type) {
-        TaskListFragment myFragment = new TaskListFragment();
+    public static ListFragment newInstance(int type) {
+        ListFragment fragment = new ListFragment();
 
-        Bundle args = new Bundle();
-        args.putInt("typeList", type);
-        myFragment.setArguments(args);
+        Bundle argumentss = new Bundle();
+        argumentss.putInt("typeList", type);
+        fragment.setArguments(argumentss);
 
-        return myFragment;
+        return fragment;
     }
 
     @Override
@@ -47,33 +46,33 @@ public class TaskListFragment extends Fragment implements UpdateAdapter {
         super.onCreate(savedInstanceState);
         //Store the listType
         if(savedInstanceState == null){
-            typeList = getArguments().getInt("typeList", 0);
+            taskType = getArguments().getInt("typeList", 0);
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater layoutInflater, ViewGroup parent,
                              Bundle savedInstanceState) {
-        View rootView =  inflater.inflate(R.layout.fragment_main, container, false);
+        View root =  layoutInflater.inflate(R.layout.fragment_list, parent, false);
         final ArrayList<Task> tasks = new ArrayList<Task>();
-        taskArrayAdapter = new TaskArrayAdapter(getActivity(), tasks, this);
-        ListView listView = (ListView) rootView.findViewById(R.id.list_tasks);
-        listView.setAdapter(taskArrayAdapter);
+        arrayAdapter = new TasksAdapter(getActivity(), tasks, this);
+        ListView tasksListView = (ListView) root.findViewById(R.id.list_tasks);
+        tasksListView.setAdapter(arrayAdapter);
 
         //Open Task
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        tasksListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Task task = taskArrayAdapter.getItem(position);
-                Intent intent = new Intent(getActivity(), TaskViewActivity.class);
-                intent.putExtra("id", task.get_id());
-                startActivity(intent);
+                Task task = arrayAdapter.getItem(position);
+                Intent i = new Intent(getActivity(), ViewActivity.class);
+                i.putExtra("id", task.get_id());
+                startActivity(i);
             }
         });
 
         //Context Menu
-        registerForContextMenu(listView);
-        return rootView;
+        registerForContextMenu(tasksListView);
+        return root;
     }
 
     @Override
@@ -85,17 +84,17 @@ public class TaskListFragment extends Fragment implements UpdateAdapter {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        Task task = taskArrayAdapter.getItem(info.position);
+        Task task = arrayAdapter.getItem(info.position);
         switch (item.getItemId()) {
-            case R.id.action_delete:
+            case R.id.task_delete:
                 new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.delete)
                         .setMessage(R.string.delete_confirmation)
 
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                DeleteTask deleteTask = new DeleteTask(getContext(), TaskListFragment.this);
-                                deleteTask.execute(task.get_id());
+                                DeleteTaskByID deleteTaskByID = new DeleteTaskByID(getContext(), ListFragment.this);
+                                deleteTaskByID.execute(task.get_id());
                                 Toast.makeText(getActivity(), "Task deleted", Toast.LENGTH_SHORT).show();
                             }
                         })
@@ -104,15 +103,15 @@ public class TaskListFragment extends Fragment implements UpdateAdapter {
                         .setIcon(R.drawable.logo_inverse)
                         .show();
                 return true;
-            case R.id.action_edit:
-                Intent intent2 = new Intent(getContext(), EditActivity.class);
-                intent2.putExtra("id", String.valueOf(task.get_id()));
-                startActivity(intent2);
+            case R.id.task_edit:
+                Intent intentEdit = new Intent(getContext(), EditActivity.class);
+                intentEdit.putExtra("id", String.valueOf(task.get_id()));
+                startActivity(intentEdit);
                 return true;
-            case R.id.action_show:
-                Intent intent3 = new Intent(getContext(), TaskViewActivity.class);
-                intent3.putExtra("id", task.get_id());
-                startActivity(intent3);
+            case R.id.show_task:
+                Intent intentShow = new Intent(getContext(), ViewActivity.class);
+                intentShow.putExtra("id", task.get_id());
+                startActivity(intentShow);
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -120,26 +119,26 @@ public class TaskListFragment extends Fragment implements UpdateAdapter {
     }
 
     @Override
-    public void updateTaskArrayAdapter(ArrayList<Task> tasks) {
-        this.taskArrayAdapter.clear();
-        taskArrayAdapter.addAll(tasks);
+    public void update(ArrayList<Task> tasks) {
+        this.arrayAdapter.clear();
+        arrayAdapter.addAll(tasks);
     }
 
     @Override
-    public void updateTaskArrayAdapter(Cursor cursor) {
-        this.taskArrayAdapter.clear();
+    public void update(Cursor cursor) {
+        this.arrayAdapter.clear();
         cursor.moveToFirst();
         while (cursor.isAfterLast() == false) {
             Task task = new Task();
-            task.set_id( cursor.getInt( cursor.getColumnIndex( TaskEntry._ID )));
-            task.setTitle( cursor.getString(cursor.getColumnIndex( TaskEntry.COLUMN_NAME_TITLE )) );
-            task.setDescription( cursor.getString(cursor.getColumnIndex( TaskEntry.COLUMN_NAME_DECRTIPTION )) );
-            Long valueDate = cursor.getLong(cursor.getColumnIndex( TaskEntry.COLUMN_NAME_DATE ));
-            if(valueDate != 0){
-                task.setDate( new Date( valueDate ));
+            task.set_id( cursor.getInt( cursor.getColumnIndex( DBHelper._ID )));
+            task.setTitle( cursor.getString(cursor.getColumnIndex( DBHelper.COLUMN_TITLE)) );
+            task.setDescription( cursor.getString(cursor.getColumnIndex( DBHelper.COLUMN_DECRTIPTION)) );
+            Long timestamp = cursor.getLong(cursor.getColumnIndex( DBHelper.COLUMN_DATE));
+            if(timestamp != 0){
+                task.setDate( new Date( timestamp ));
             }
-            task.setDone( cursor.getInt(cursor.getColumnIndex( TaskEntry.COLUMN_NAME_DONE )) > 0);
-            this.taskArrayAdapter.add(task);
+            task.setDone( cursor.getInt(cursor.getColumnIndex( DBHelper.COLUMN_DONE)) > 0);
+            this.arrayAdapter.add(task);
             cursor.moveToNext();
         }
         cursor.close();
@@ -147,103 +146,103 @@ public class TaskListFragment extends Fragment implements UpdateAdapter {
 
     @Override
     public void update() {
-        switch (typeList){
+        switch (taskType){
             case 0:
-                GetPendingTasks getPendingTasks = new GetPendingTasks(getContext(), this);
-                getPendingTasks.execute();
+                PendingTasks pendingTasks = new PendingTasks(getContext(), this);
+                pendingTasks.execute();
                 break;
             case 1:
-                GetDoneTasks getDoneTasks = new GetDoneTasks(getContext(), this);
-                getDoneTasks.execute();
+                DoneTasks doneTasks = new DoneTasks(getContext(), this);
+                doneTasks.execute();
                 break;
             case 2:
-                GetAllTasks getAllTasks = new GetAllTasks(getContext(), this);
-                getAllTasks.execute();
+                AllTasks allTasks = new AllTasks(getContext(), this);
+                allTasks.execute();
                 break;
         }
     }
 
-    private class GetAllTasks extends AsyncTask<Void, Void, Cursor>{
+    private class AllTasks extends AsyncTask<Void, Void, Cursor>{
 
-        private UpdateAdapter updateAdapter;
+        private UpdateInterface updateAdapter;
         private Context context;
 
-        public GetAllTasks(Context context, UpdateAdapter updateAdapter) {
-            this.updateAdapter = updateAdapter;
+        public AllTasks(Context context, UpdateInterface updateInterface) {
+            this.updateAdapter = updateInterface;
             this.context = context;
         }
 
         @Override
         protected Cursor doInBackground(Void... voids) {
-            TaskDBHelper taskDBHelper = TaskDBHelper.getInstance(this.context);
-            return taskDBHelper.getAll();
+            DBHelper taskDBHelper = DBHelper.getInstance(this.context);
+            return taskDBHelper.getAllTask();
         }
 
         @Override
         protected void onPostExecute(Cursor cursor) {
-            updateAdapter.updateTaskArrayAdapter(cursor);
+            updateAdapter.update(cursor);
         }
     }
 
-    private class GetDoneTasks extends AsyncTask<Void, Void, Cursor>{
+    private class DoneTasks extends AsyncTask<Void, Void, Cursor>{
 
-        private UpdateAdapter updateAdapter;
+        private UpdateInterface updateAdapter;
         private Context context;
 
-        public GetDoneTasks(Context context, UpdateAdapter updateAdapter) {
-            this.updateAdapter = updateAdapter;
+        public DoneTasks(Context context, UpdateInterface updateInterface) {
+            this.updateAdapter = updateInterface;
             this.context = context;
         }
 
         @Override
         protected Cursor doInBackground(Void... voids) {
-            TaskDBHelper taskDBHelper = TaskDBHelper.getInstance(this.context);
-            return taskDBHelper.getDone();
+            DBHelper taskDBHelper = DBHelper.getInstance(this.context);
+            return taskDBHelper.getDoneTask();
         }
 
         @Override
         protected void onPostExecute(Cursor cursor) {
-            updateAdapter.updateTaskArrayAdapter(cursor);
+            updateAdapter.update(cursor);
         }
     }
 
-    private class GetPendingTasks extends AsyncTask<Void, Void, Cursor>{
+    private class PendingTasks extends AsyncTask<Void, Void, Cursor>{
 
-        private UpdateAdapter updateAdapter;
+        private UpdateInterface updateAdapter;
         private Context context;
 
-        public GetPendingTasks(Context context, UpdateAdapter updateAdapter) {
-            this.updateAdapter = updateAdapter;
+        public PendingTasks(Context context, UpdateInterface updateInterface) {
+            this.updateAdapter = updateInterface;
             this.context = context;
         }
 
         @Override
         protected Cursor doInBackground(Void... voids) {
-            TaskDBHelper taskDBHelper = TaskDBHelper.getInstance(this.context);
-            return taskDBHelper.getPending();
+            DBHelper taskDBHelper = DBHelper.getInstance(this.context);
+            return taskDBHelper.getPendingTask();
         }
 
         @Override
         protected void onPostExecute(Cursor cursor) {
-            updateAdapter.updateTaskArrayAdapter(cursor);
+            updateAdapter.update(cursor);
         }
     }
 
-    private class DeleteTask extends AsyncTask<Integer, Void, Void>{
+    private class DeleteTaskByID extends AsyncTask<Integer, Void, Void>{
 
-        private UpdateAdapter updateAdapter;
+        private UpdateInterface updateAdapter;
         private Context context;
 
-        public DeleteTask(Context context, UpdateAdapter updateAdapter) {
-            this.updateAdapter = updateAdapter;
+        public DeleteTaskByID(Context context, UpdateInterface updateInterface) {
+            this.updateAdapter = updateInterface;
             this.context = context;
         }
 
         @Override
         protected Void doInBackground(Integer... integers) {
             for(Integer id: integers){
-                TaskDBHelper taskDBHelper = TaskDBHelper.getInstance(this.context);
-                taskDBHelper.delete(id);
+                DBHelper taskDBHelper = DBHelper.getInstance(this.context);
+                taskDBHelper.deleteTaskbyID(id);
             }
             return null;
         }

@@ -10,15 +10,15 @@ public class Task {
     private String title;
     private String description;
     private Date date;
-    private boolean done;
+    private boolean isDone;
 
     public Task(){}
 
-    public Task(String title, String description, Date date, boolean done) {
+    public Task(String title, String description, Date date, boolean isDone) {
         this.title = title;
         this.description = description;
         this.date = date;
-        this.done = done;
+        this.isDone = isDone;
     }
 
     public int get_id() {
@@ -54,10 +54,10 @@ public class Task {
     }
 
     public boolean isDone() {
-        return done;
+        return isDone;
     }
 
     public void setDone(boolean done) {
-        this.done = done;
+        this.isDone = done;
     }
 }

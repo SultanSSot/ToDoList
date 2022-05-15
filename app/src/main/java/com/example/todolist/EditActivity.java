@@ -16,45 +16,37 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
-import com.mobsandgeeks.saripaar.ValidationError;
-import com.mobsandgeeks.saripaar.Validator;
-import com.mobsandgeeks.saripaar.annotation.NotEmpty;
-
-import com.example.todolist.database.TaskDBHelper;
+import com.example.todolist.database.DBHelper;
 import com.example.todolist.model.Task;
-import com.example.todolist.util.DateUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
 
-public class EditTaskActivity extends AppCompatActivity implements  Validator.ValidationListener{
+public class EditActivity extends AppCompatActivity{
 
     private Calendar calendar;
-    private Validator validator;
-    @NotEmpty(messageResId = R.string.field_empty)
-    private EditText titleTask;
-    private EditText descriptionTask;
+    private EditText titleTaskET;
+    private EditText descriptionTaskET;
     private Task task;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_view);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_edit);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.actionbar_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Intent intent = getIntent();
-        String tastId = intent.getStringExtra("id");
-        task = TaskDBHelper.getInstance(this).getTask(tastId);
+        Intent i = getIntent();
+        String tastId = i.getStringExtra("id");
+        task = DBHelper.getInstance(this).getTaskbyID(tastId);
 
-        titleTask = (EditText) findViewById(R.id.title);
-        descriptionTask = (EditText) findViewById(R.id.description);
+        titleTaskET = findViewById(R.id.et_title);
+        descriptionTaskET = findViewById(R.id.et_description);
 
-        titleTask.setText(task.getTitle());
-        descriptionTask.setText(task.getDescription());
+        titleTaskET.setText(task.getTitle());
+        descriptionTaskET.setText(task.getDescription());
         if(task.getDate() == null){
             calendar = null;
         }else{
@@ -62,9 +54,7 @@ public class EditTaskActivity extends AppCompatActivity implements  Validator.Va
             calendar.setTime(task.getDate());
         }
 
-        titleTask = (EditText) findViewById(R.id.title);
-        validator = new Validator(this);
-        validator.setValidationListener(this);
+        titleTaskET = findViewById(R.id.et_title);
         updateTime();
     }
 
@@ -77,11 +67,18 @@ public class EditTaskActivity extends AppCompatActivity implements  Validator.Va
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_cancel) {
+        if (id == R.id.task_cancel) {
             this.finish();
             return true;
-        }else if(id == R.id.action_save){
-            validator.validate();
+        }else if(id == R.id.task_save){
+            task.setTitle(titleTaskET.getText().toString());
+            task.setDescription(descriptionTaskET.getText().toString());
+            if( calendar != null ){
+                task.setDate(calendar.getTime());
+            }
+            UpdateEntry updateEntry = new UpdateEntry(this);
+            updateEntry.execute(task);
+            this.finish();
             return true;
         }
 
@@ -89,110 +86,84 @@ public class EditTaskActivity extends AppCompatActivity implements  Validator.Va
     }
 
     public void showDatePickerDialog(View v) {
-        Calendar calendarTemp;
-        if(calendar == null) {
-            calendarTemp = Calendar.getInstance();
+        Calendar calendar;
+        if(this.calendar == null) {
+            calendar = Calendar.getInstance();
         }else{
-            calendarTemp = this.calendar;
+            calendar = this.calendar;
         }
-        DatePickerDialog.OnDateSetListener myDateListener = new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker arg0, int year, int month, int day) {
-                if(calendar == null){
-                    calendar = Calendar.getInstance();
+                if(EditActivity.this.calendar == null){
+                    EditActivity.this.calendar = Calendar.getInstance();
                 }
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, month);
-                calendar.set(Calendar.DAY_OF_MONTH, day);
+                EditActivity.this.calendar.set(Calendar.YEAR, year);
+                EditActivity.this.calendar.set(Calendar.MONTH, month);
+                EditActivity.this.calendar.set(Calendar.DAY_OF_MONTH, day);
                 updateTime();
-                ImageButton button = (ImageButton) findViewById(R.id.button_remove_date);
-                button.setVisibility(View.VISIBLE);
+                ImageButton imageButton = findViewById(R.id.remove_date_button);
+                imageButton.setVisibility(View.VISIBLE);
             }
         };
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, myDateListener, calendarTemp.get(Calendar.YEAR), calendarTemp.get(Calendar.MONTH), calendarTemp.get(Calendar.DAY_OF_MONTH));
-        datePickerDialog.show();
+        DatePickerDialog dialog = new DatePickerDialog(this, listener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        dialog.show();
     }
 
-    public void removeDate(View v) {
-        ImageButton button = (ImageButton) findViewById(R.id.button_remove_date);
-        button.setVisibility(View.GONE);
+    public void removeDateButton(View v) {
+        ImageButton imageButton = findViewById(R.id.remove_date_button);
+        imageButton.setVisibility(View.GONE);
         calendar = null;
         updateTime();
     }
 
     public void showTimePickerDialog(View v) {
-        Calendar calendarTemp;
-        if(calendar == null) {
-            calendarTemp = Calendar.getInstance();
+        Calendar calendar;
+        if(this.calendar == null) {
+            calendar = Calendar.getInstance();
         }else{
-            calendarTemp = this.calendar;
+            calendar = this.calendar;
         }
-        TimePickerDialog.OnTimeSetListener myTimeListener = new TimePickerDialog.OnTimeSetListener() {
+        TimePickerDialog.OnTimeSetListener listener = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int h, int m) {
-                if(calendar == null){
-                    calendar = Calendar.getInstance();
+                if(EditActivity.this.calendar == null){
+                    EditActivity.this.calendar = Calendar.getInstance();
                 }
-                calendar.set(Calendar.HOUR_OF_DAY, h);
-                calendar.set(Calendar.MINUTE, m);
+                EditActivity.this.calendar.set(Calendar.HOUR_OF_DAY, h);
+                EditActivity.this.calendar.set(Calendar.MINUTE, m);
                 updateTime();
-                ImageButton button = (ImageButton) findViewById(R.id.button_remove_date);
+                ImageButton button = (ImageButton) findViewById(R.id.remove_date_button);
                 button.setVisibility(View.VISIBLE);
             }
         };
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, myTimeListener, calendarTemp.get(Calendar.HOUR_OF_DAY), calendarTemp.get(Calendar.MINUTE), true);
-        timePickerDialog.show();
+        TimePickerDialog dialog = new TimePickerDialog(this, listener, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true);
+        dialog.show();
     }
 
     public void updateTime(){
-        TextView textView = (TextView) findViewById(R.id.date);
+        TextView textViewDate = findViewById(R.id.tv_date);
         if(calendar != null){
-            textView.setText(new DateUtil(this).parse(calendar.getTime()));
+            textViewDate.setText(new SimpleDateFormat("EEE").format(calendar.getTime()) + ", " + new SimpleDateFormat().format(calendar.getTime()));
         }else{
-            textView.setText("");
+            textViewDate.setText("");
         }
     }
 
-    @Override
-    public void onValidationSucceeded() {
-        task.setTitle(titleTask.getText().toString());
-        task.setDescription(descriptionTask.getText().toString());
-        if( calendar != null ){
-            task.setDate(calendar.getTime());
-        }
-        UpdateTask updateTask = new UpdateTask(this);
-        updateTask.execute(task);
-        this.finish();
-    }
 
-    @Override
-    public void onValidationFailed(List<ValidationError> errors) {
-        for (ValidationError error : errors) {
-            View view = error.getView();
-            String message = error.getCollatedErrorMessage(this);
-
-            // Display error messages
-            if (view instanceof EditText) {
-                ((EditText) view).setError(message);
-            } else {
-                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    private class UpdateTask extends AsyncTask<Task, Void, Void> {
+    private class UpdateEntry extends AsyncTask<Task, Void, Void> {
 
         private Context context;
 
-        public UpdateTask (Context context){
+        public UpdateEntry(Context context){
             this.context = context;
         }
 
         @Override
         protected Void doInBackground(final Task... tasks) {
             for(Task task: tasks) {
-                TaskDBHelper taskDBHelper = TaskDBHelper.getInstance(this.context);
-                taskDBHelper.update(task);
+                DBHelper taskDBHelper = DBHelper.getInstance(this.context);
+                taskDBHelper.updateTask(task);
             }
             return null;
         }

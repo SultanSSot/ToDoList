@@ -20,11 +20,11 @@ import java.util.List;
 /**
  * Created by rodrigo on 06/09/16.
  */
-public class TaskArrayAdapter extends ArrayAdapter<Task>{
+public class TasksAdapter extends ArrayAdapter<Task>{
     private List<Task> tasks;
     private UpdateInterface updateInterface;
 
-    public TaskArrayAdapter(Context context, ArrayList<Task> taskArrayList, UpdateInterface updateInterface) {
+    public TasksAdapter(Context context, ArrayList<Task> taskArrayList, UpdateInterface updateInterface) {
         super(context, 0, taskArrayList);
         taskArrayList = new ArrayList<Task>();
         this.updateInterface = updateInterface;

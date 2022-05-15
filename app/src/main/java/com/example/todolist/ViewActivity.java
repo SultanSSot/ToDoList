@@ -15,11 +15,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.todolist.database.TaskDBHelper;
+import com.example.todolist.database.DBHelper;
 import com.example.todolist.model.Task;
-import com.example.todolist.util.DateUtil;
 
-public class TaskViewActivity extends AppCompatActivity {
+import java.text.SimpleDateFormat;
+
+public class ViewActivity extends AppCompatActivity {
 
     private int id;
 
@@ -27,8 +28,8 @@ public class TaskViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_view_task);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_view);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.actionbar_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
@@ -42,19 +43,19 @@ public class TaskViewActivity extends AppCompatActivity {
     }
 
     public void updateFields(){
-        Task task = TaskDBHelper.getInstance(this).getTask(String.valueOf(this.id));
+        Task task = DBHelper.getInstance(this).getTaskbyID(String.valueOf(this.id));
 
-        TextView titulo = (TextView) findViewById(R.id.title_view);
-        TextView data = (TextView) findViewById(R.id.date_view);
-        TextView descricao = (TextView) findViewById(R.id.decription_view);
+        TextView tvTitle = findViewById(R.id.tv_title);
+        TextView tvDate = findViewById(R.id.tv_datetime);
+        TextView tvDesc = findViewById(R.id.tv_desc);
 
-        titulo.setText(task.getTitle());
-        descricao.setText(task.getDescription());
+        tvTitle.setText(task.getTitle());
+        tvDesc.setText(task.getDescription());
         if(task.getDate() == null){
-            data.setVisibility(View.GONE);
+            tvDate.setVisibility(View.GONE);
         }else {
-            data.setVisibility(View.VISIBLE);
-            data.setText(new DateUtil(this).parse(task.getDate()));
+            tvDate.setVisibility(View.VISIBLE);
+            tvDate.setText(new SimpleDateFormat("EEE").format(task.getDate()) + ", " + new SimpleDateFormat().format(task.getDate()));
         }
     }
 
@@ -66,20 +67,20 @@ public class TaskViewActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id_menu = item.getItemId();
-        if (id_menu == R.id.action_delete) {
+        int menuID = item.getItemId();
+        if (menuID == R.id.task_delete) {
             if(this.id == 0) {
-                Toast.makeText(this, "Task identifier unavaliable", Toast.LENGTH_SHORT);
+                Toast.makeText(this, "Error", Toast.LENGTH_SHORT);
             }else{
-                new AlertDialog.Builder(TaskViewActivity.this)
+                new AlertDialog.Builder(ViewActivity.this)
                         .setTitle(R.string.delete)
                         .setMessage(R.string.delete_confirmation)
 
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                DeleteTask deleteTask = new DeleteTask(TaskViewActivity.this);
-                                deleteTask.execute(TaskViewActivity.this.id);
-                                Toast.makeText(TaskViewActivity.this, "Task deleted", Toast.LENGTH_SHORT).show();
+                                DeleteEntry deleteEntry = new DeleteEntry(ViewActivity.this);
+                                deleteEntry.execute(ViewActivity.this.id);
+                                Toast.makeText(ViewActivity.this, "Task deleted", Toast.LENGTH_SHORT).show();
                             }
                         })
 
@@ -88,32 +89,32 @@ public class TaskViewActivity extends AppCompatActivity {
                         .show();
             }
             return true;
-        }else if(id_menu == R.id.action_edit){
+        }else if(menuID == R.id.task_edit){
             if(this.id == 0) {
-                Toast.makeText(this, "Task identifier unavaliable", Toast.LENGTH_SHORT);
+                Toast.makeText(this, "Error", Toast.LENGTH_SHORT);
             }else{
-                Intent intent = new Intent(this, EditActivity.class);
-                intent.putExtra("id", String.valueOf(id));
-                startActivity(intent);
+                Intent i = new Intent(this, EditActivity.class);
+                i.putExtra("id", String.valueOf(id));
+                startActivity(i);
             }
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private class DeleteTask extends AsyncTask<Integer, Void, Void>{
+    private class DeleteEntry extends AsyncTask<Integer, Void, Void>{
 
         private Activity activity;
 
-        public DeleteTask(Activity activity) {
+        public DeleteEntry(Activity activity) {
             this.activity = activity;
         }
 
         @Override
-        protected Void doInBackground(Integer... integers) {
-            for(Integer id: integers){
-                TaskDBHelper taskDBHelper = TaskDBHelper.getInstance(this.activity);
-                taskDBHelper.delete(id);
+        protected Void doInBackground(Integer... args) {
+            for(Integer id: args){
+                DBHelper helper = DBHelper.getInstance(this.activity);
+                helper.deleteTaskbyID(id);
             }
             return null;
         }
