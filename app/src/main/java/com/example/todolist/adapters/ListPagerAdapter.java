@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.example.todolist.MainActivityFragment;
+import com.example.todolist.ListFragment;
 
 /**
  * Created by rodrigo on 11/10/16.
@@ -21,11 +21,11 @@ public class MainFragmentPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0: // Fragment - Pending
-                return MainActivityFragment.newInstance(0);
+                return ListFragment.newInstance(0);
             case 1: // Fragment - Done
-                return MainActivityFragment.newInstance(1);
+                return ListFragment.newInstance(1);
             case 2: // Fragment - All
-                return MainActivityFragment.newInstance(2);
+                return ListFragment.newInstance(2);
             default:
                 return null;
         }
@@ -53,7 +53,7 @@ public class MainFragmentPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getItemPosition(Object object) {
-        MainActivityFragment f = (MainActivityFragment) object;
+        ListFragment f = (ListFragment) object;
         if (f != null) {
             f.update();
         }

@@ -1,15 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.todolist.NewTaskActivity">
+    tools:context="com.example.todolist.NewActivity">
     <item
-        android:id="@+id/action_save"
+        android:id="@+id/save_task"
         android:orderInCategory="100"
         android:icon="@drawable/ic_check"
         app:showAsAction="always"
         android:title="@string/action_save" />
     <item
-        android:id="@+id/action_cancel"
+        android:id="@+id/cancel_task"
         android:orderInCategory="100"
         android:icon="@drawable/ic_close"
         app:showAsAction="always"

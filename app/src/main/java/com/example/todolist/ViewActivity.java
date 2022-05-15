@@ -19,7 +19,7 @@ import com.example.todolist.database.TaskDBHelper;
 import com.example.todolist.model.Task;
 import com.example.todolist.util.DateUtil;
 
-public class ViewTaskActivity extends AppCompatActivity {
+public class TaskViewActivity extends AppCompatActivity {
 
     private int id;
 
@@ -71,15 +71,15 @@ public class ViewTaskActivity extends AppCompatActivity {
             if(this.id == 0) {
                 Toast.makeText(this, "Task identifier unavaliable", Toast.LENGTH_SHORT);
             }else{
-                new AlertDialog.Builder(ViewTaskActivity.this)
+                new AlertDialog.Builder(TaskViewActivity.this)
                         .setTitle(R.string.delete)
                         .setMessage(R.string.delete_confirmation)
 
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                DeleteTask deleteTask = new DeleteTask(ViewTaskActivity.this);
-                                deleteTask.execute(ViewTaskActivity.this.id);
-                                Toast.makeText(ViewTaskActivity.this, "Task deleted", Toast.LENGTH_SHORT).show();
+                                DeleteTask deleteTask = new DeleteTask(TaskViewActivity.this);
+                                deleteTask.execute(TaskViewActivity.this.id);
+                                Toast.makeText(TaskViewActivity.this, "Task deleted", Toast.LENGTH_SHORT).show();
                             }
                         })
 
@@ -92,7 +92,7 @@ public class ViewTaskActivity extends AppCompatActivity {
             if(this.id == 0) {
                 Toast.makeText(this, "Task identifier unavaliable", Toast.LENGTH_SHORT);
             }else{
-                Intent intent = new Intent(this, EditTaskActivity.class);
+                Intent intent = new Intent(this, EditActivity.class);
                 intent.putExtra("id", String.valueOf(id));
                 startActivity(intent);
             }

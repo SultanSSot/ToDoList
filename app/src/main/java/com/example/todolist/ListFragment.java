@@ -26,14 +26,14 @@ import com.example.todolist.database.TaskContract.TaskEntry;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class MainActivityFragment extends Fragment implements UpdateAdapter {
+public class TaskListFragment extends Fragment implements UpdateAdapter {
 
     private TaskArrayAdapter taskArrayAdapter;
     private int typeList;
-    public MainActivityFragment() { }
+    public TaskListFragment() { }
 
-    public static MainActivityFragment newInstance(int type) {
-        MainActivityFragment myFragment = new MainActivityFragment();
+    public static TaskListFragment newInstance(int type) {
+        TaskListFragment myFragment = new TaskListFragment();
 
         Bundle args = new Bundle();
         args.putInt("typeList", type);
@@ -65,7 +65,7 @@ public class MainActivityFragment extends Fragment implements UpdateAdapter {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Task task = taskArrayAdapter.getItem(position);
-                Intent intent = new Intent(getActivity(), ViewTaskActivity.class);
+                Intent intent = new Intent(getActivity(), TaskViewActivity.class);
                 intent.putExtra("id", task.get_id());
                 startActivity(intent);
             }
@@ -94,7 +94,7 @@ public class MainActivityFragment extends Fragment implements UpdateAdapter {
 
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                DeleteTask deleteTask = new DeleteTask(getContext(), MainActivityFragment.this);
+                                DeleteTask deleteTask = new DeleteTask(getContext(), TaskListFragment.this);
                                 deleteTask.execute(task.get_id());
                                 Toast.makeText(getActivity(), "Task deleted", Toast.LENGTH_SHORT).show();
                             }
@@ -105,12 +105,12 @@ public class MainActivityFragment extends Fragment implements UpdateAdapter {
                         .show();
                 return true;
             case R.id.action_edit:
-                Intent intent2 = new Intent(getContext(), EditTaskActivity.class);
+                Intent intent2 = new Intent(getContext(), EditActivity.class);
                 intent2.putExtra("id", String.valueOf(task.get_id()));
                 startActivity(intent2);
                 return true;
             case R.id.action_show:
-                Intent intent3 = new Intent(getContext(), ViewTaskActivity.class);
+                Intent intent3 = new Intent(getContext(), TaskViewActivity.class);
                 intent3.putExtra("id", task.get_id());
                 startActivity(intent3);
                 return true;

@@ -31,7 +31,7 @@ import com.example.todolist.util.DateUtil;
 import java.util.Calendar;
 import java.util.List;
 
-public class NewTaskActivity extends AppCompatActivity implements Validator.ValidationListener {
+public class TaskNewActivity extends AppCompatActivity implements Validator.ValidationListener {
 
     private Calendar calendar;
     private Validator validator;

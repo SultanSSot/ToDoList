@@ -10,7 +10,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:fitsSystemWindows="true"
-        tools:context="com.example.todolist.NewTaskActivity">
+        tools:context="com.example.todolist.NewActivity">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
@@ -18,7 +18,7 @@
             android:theme="@style/AppTheme.AppBarOverlay">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
+                android:id="@+id/actionbar_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
@@ -45,7 +45,7 @@
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/title"
+                    android:id="@+id/et_title"
                     android:inputType="textCapSentences"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentLeft="true"
@@ -66,7 +66,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textMultiLine|textCapSentences"
-                    android:id="@+id/description"
+                    android:id="@+id/et_description"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:hint="@string/placeholder_description"
@@ -86,7 +86,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="date"
-                    android:id="@+id/date"
+                    android:id="@+id/tv_date"
                     android:hint="@string/select_time"
                     android:clickable="false"
                     android:cursorVisible="false"
@@ -120,15 +120,15 @@
                 android:id="@+id/button_time"
                 android:onClick="showTimePickerDialog"
                 android:layout_below="@+id/description_label"
-                android:layout_toLeftOf="@+id/button_remove_date"
-                android:layout_toStartOf="@+id/button_remove_date"
+                android:layout_toLeftOf="@+id/remove_date_button"
+                android:layout_toStartOf="@+id/remove_date_button"
                 android:layout_alignBottom="@+id/button_date"
                 android:layout_alignWithParentIfMissing="true" />
 
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/button_remove_date"
+                android:id="@+id/remove_date_button"
                 android:src="@drawable/ic_close_black"
                 android:layout_below="@+id/description_label"
                 android:layout_alignRight="@+id/description_label"
